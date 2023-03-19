@@ -22,7 +22,7 @@ let package = Package(
             name: "open-meteo-swift",
             dependencies: []),
         .testTarget(
-            name: "open-meteo-swiftTests",
+            name: "open-meteo-swift-tests",
             dependencies: ["open-meteo-swift"]),
     ]
 )
