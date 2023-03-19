@@ -1,7 +1,7 @@
 import XCTest
-@testable import open_meteo_swift
+@testable import OpenMeteoSwift
 
-final class OpenMeteoSwiftTests: XCTestCase {
+extension OpenMeteoSwiftTests {
     func testMarineResponse() throws {
         let data = """
         {
@@ -39,8 +39,6 @@ final class OpenMeteoSwiftTests: XCTestCase {
         let decodeTest = try decoder.decode(MarineResponse.self, from: data)
         let hourlySorted = decodeTest.hourly!.sorted(by: {$0.key < $1.key})
         let dailySorted = decodeTest.daily!.sorted(by: {$0.key < $1.key})
-
-
 
         XCTAssertEqual(decodeTest.latitude, 33.75)
         XCTAssertEqual(decodeTest.longitude, -118.75)
