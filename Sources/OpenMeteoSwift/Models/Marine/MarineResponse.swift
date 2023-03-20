@@ -77,65 +77,73 @@ public struct MarineResponse: MeteoData {
         // Decode hourly units
         var hourlyUnitsDict = [HourlyMarineVariable: String]()
 
-        let hourlyUnitsContainer = try container.nestedContainer(keyedBy: HourlyMarineVariable.self, forKey: .hourlyUnits)
-        for key in hourlyUnitsContainer.allKeys {
-            let value = try hourlyUnitsContainer.decode(String.self, forKey: key)
-            hourlyUnitsDict[key] = value
+        let hourlyUnitsContainer = try? container.nestedContainer(keyedBy: HourlyMarineVariable.self, forKey: .hourlyUnits)
+        if let hourlyUnitsContainer {
+            for key in hourlyUnitsContainer.allKeys {
+                let value = try hourlyUnitsContainer.decode(String.self, forKey: key)
+                hourlyUnitsDict[key] = value
+            }
+            self.hourlyUnits = hourlyUnitsDict
         }
-        self.hourlyUnits = hourlyUnitsDict
 
         // Decode daily units
         var dailyUnitsDict = [DailyMarineVariable: String]()
 
-        let dailyUnitsContainer = try container.nestedContainer(keyedBy: DailyMarineVariable.self, forKey: .dailyUnits)
-        for key in dailyUnitsContainer.allKeys {
-            let value = try dailyUnitsContainer.decode(String.self, forKey: key)
-            dailyUnitsDict[key] = value
+        let dailyUnitsContainer = try? container.nestedContainer(keyedBy: DailyMarineVariable.self, forKey: .dailyUnits)
+        if let dailyUnitsContainer {
+            for key in dailyUnitsContainer.allKeys {
+                let value = try dailyUnitsContainer.decode(String.self, forKey: key)
+                dailyUnitsDict[key] = value
+            }
+            self.dailyUnits = dailyUnitsDict
         }
-        self.dailyUnits = dailyUnitsDict
 
         // Decode hourly
         var hourlyDict: [Date: [HourlyMarineVariable: Float]] = [:]
 
-        let hourlyContainer = try container.nestedContainer(keyedBy: PrivateHourlyMarineVariable.self, forKey: .hourly)
-        let timeArray = try hourlyContainer.decode([Date].self, forKey: .time)
+        let hourlyContainer = try? container.nestedContainer(keyedBy: PrivateHourlyMarineVariable.self, forKey: .hourly)
+        if let hourlyContainer {
+            let timeArray = try hourlyContainer.decode([Date].self, forKey: .time)
 
-        for (index, date) in timeArray.enumerated() {
+            for (index, date) in timeArray.enumerated() {
 
-            for (key) in hourlyContainer.allKeys {
-                if key != .time {
-                    let element = try hourlyContainer.decode([Float].self, forKey: key)
+                for (key) in hourlyContainer.allKeys {
+                    if key != .time {
+                        let element = try hourlyContainer.decode([Float].self, forKey: key)
 
-                    if (hourlyDict[date] != nil) {
-                        hourlyDict[date]!.updateValue(element[index], forKey: HourlyMarineVariable(rawValue: key.rawValue)!)
-                    } else {
-                        hourlyDict.updateValue([HourlyMarineVariable(rawValue: key.rawValue)!: element[index]], forKey: date)
+                        if (hourlyDict[date] != nil) {
+                            hourlyDict[date]!.updateValue(element[index], forKey: HourlyMarineVariable(rawValue: key.rawValue)!)
+                        } else {
+                            hourlyDict.updateValue([HourlyMarineVariable(rawValue: key.rawValue)!: element[index]], forKey: date)
+                        }
                     }
                 }
             }
+            self.hourly = hourlyDict
         }
-        self.hourly = hourlyDict
 
         // Decode daily
         var dailyDict: [Date: [DailyMarineVariable: Float]] = [:]
 
-        let dailyContainer = try container.nestedContainer(keyedBy: PrivateDailyMarineVariable.self, forKey: .daily)
-        let timeArrayDaily = try dailyContainer.decode([Date].self, forKey: .time)
-
-        for (index, date) in timeArrayDaily.enumerated() {
-
-            for (key) in dailyContainer.allKeys {
-                if key != .time {
-                    let element = try dailyContainer.decode([Float].self, forKey: key)
-
-                    if (dailyDict[date] != nil) {
-                        dailyDict[date]!.updateValue(element[index], forKey: DailyMarineVariable(rawValue: key.rawValue)!)
-                    } else {
-                        dailyDict.updateValue([DailyMarineVariable(rawValue: key.rawValue)!: element[index]], forKey: date)
+        let dailyContainer = try? container.nestedContainer(keyedBy: PrivateDailyMarineVariable.self, forKey: .daily)
+        if let dailyContainer {
+            let timeArrayDaily = try dailyContainer.decode([Date].self, forKey: .time)
+            
+            for (index, date) in timeArrayDaily.enumerated() {
+                
+                for (key) in dailyContainer.allKeys {
+                    if key != .time {
+                        let element = try dailyContainer.decode([Float].self, forKey: key)
+                        
+                        if (dailyDict[date] != nil) {
+                            dailyDict[date]!.updateValue(element[index], forKey: DailyMarineVariable(rawValue: key.rawValue)!)
+                        } else {
+                            dailyDict.updateValue([DailyMarineVariable(rawValue: key.rawValue)!: element[index]], forKey: date)
+                        }
                     }
                 }
             }
+            self.daily = dailyDict
         }
-        self.daily = dailyDict
     }
 }

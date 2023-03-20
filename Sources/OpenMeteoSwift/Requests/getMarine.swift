@@ -46,9 +46,15 @@ public extension OpenMeteo {
         startDate: Date,
         endDate: Date
     ) async -> (data: MarineResponse?, error: ErrorResponse?) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
         let queries: [URLQueryItem] = [
             URLQueryItem(name: "latitude", value: "\(lat)"),
             URLQueryItem(name: "longitude", value: "\(long)"),
+            URLQueryItem(name: "hourly", value: "\(hourly.compactMap{$0.rawValue}.joined(separator: ","))"),
+            URLQueryItem(name: "timezone", value: timezone),
+            URLQueryItem(name: "start_date", value: dateFormatter.string(from: startDate)),
+            URLQueryItem(name: "end_date", value: dateFormatter.string(from: endDate))
         ]
         return await fetchMarineData(queries)
     }
@@ -70,10 +76,14 @@ public extension OpenMeteo {
         timezone: String,
         pastDays: Int? = nil
     ) async -> (data: MarineResponse?, error: ErrorResponse?) {
-        let queries: [URLQueryItem] = [
+        var queries: [URLQueryItem] = [
             URLQueryItem(name: "latitude", value: "\(lat)"),
             URLQueryItem(name: "longitude", value: "\(long)"),
+            URLQueryItem(name: "timezone", value: timezone),
+            URLQueryItem(name: "daily", value: "\(daily.compactMap{$0.rawValue}.joined(separator: ","))"),
         ]
+        if let hourly { queries.append(URLQueryItem(name: "hourly", value: "\(hourly.compactMap{$0.rawValue}.joined(separator: ","))")) }
+        if let pastDays { queries.append(URLQueryItem(name: "past_days", value: "\(pastDays)")) }
         return await fetchMarineData(queries)
     }
 
@@ -97,10 +107,17 @@ public extension OpenMeteo {
         startDate: Date,
         endDate: Date
     ) async -> (data: MarineResponse?, error: ErrorResponse?) {
-        let queries: [URLQueryItem] = [
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        var queries: [URLQueryItem] = [
             URLQueryItem(name: "latitude", value: "\(lat)"),
             URLQueryItem(name: "longitude", value: "\(long)"),
+            URLQueryItem(name: "daily", value: "\(daily.compactMap{$0.rawValue}.joined(separator: ","))"),
+            URLQueryItem(name: "timezone", value: timezone),
+            URLQueryItem(name: "start_date", value: dateFormatter.string(from: startDate)),
+            URLQueryItem(name: "end_date", value: dateFormatter.string(from: endDate))
         ]
+        if let hourly { queries.append(URLQueryItem(name: "hourly", value: "\(hourly.compactMap{$0.rawValue}.joined(separator: ","))")) }
         return await fetchMarineData(queries)
     }
 
@@ -112,6 +129,8 @@ public extension OpenMeteo {
         urlComponents.queryItems = queries
         urlComponents.queryItems?.append(URLQueryItem(name: "timeformat", value: "unixtime"))
 
+        print(urlComponents.url!)
+
         let request = URLRequest(url: urlComponents.url!)
 
         do {
@@ -119,17 +138,17 @@ public extension OpenMeteo {
 
             // Catch any errors returned from the api
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
-
                 let error = try? decoder.decode(ErrorResponse.self, from: data)
 
                 print("OpenMeteoAPI Server Returned Error: \(error?.reason ?? "Unknown Reason")")
             }
 
             let result = try decoder.decode(MarineResponse.self, from: data)
+            print("RESULT: \(result)")
             return (result, nil)
 
         } catch {
-            print("OpenMeteoAPI Request Error: \(error.localizedDescription)")
+            print("OpenMeteoAPI Request Error: \(error)")
             return (nil, ErrorResponse(error: true, reason: error.localizedDescription))
         }
     }

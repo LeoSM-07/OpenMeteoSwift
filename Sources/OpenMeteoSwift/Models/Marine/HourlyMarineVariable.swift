@@ -17,7 +17,7 @@ public enum HourlyMarineVariable: String, MeteoData, CaseIterable, CodingKey {
     case swellWavePeriod = "swell_wave_period"
     case swellWavePeakPeriod = "swell_wave_peak_period"
 
-    var name: String {
+    public var name: String {
         switch self {
         case .waveHeight:
             return "Wave Height"

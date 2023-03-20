@@ -17,7 +17,7 @@ public enum DailyMarineVariable: String, MeteoData, CaseIterable, CodingKey {
     case swellWavePeriodMax = "swell_wave_period_max"
     case swellWavePeakPeriodMax = "swell_wave_peak_period_max"
 
-    var name: String {
+    public var name: String {
         switch self {
         case .waveHeightMax:
             return "Wave Height Max"
