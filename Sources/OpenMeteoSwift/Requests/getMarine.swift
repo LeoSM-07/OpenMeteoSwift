@@ -144,7 +144,6 @@ public extension OpenMeteo {
             }
 
             let result = try decoder.decode(MarineResponse.self, from: data)
-            print("RESULT: \(result)")
             return (result, nil)
 
         } catch {
