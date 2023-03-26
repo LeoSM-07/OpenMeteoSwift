@@ -13,7 +13,7 @@ public extension OpenMeteo {
             case kmh = "kmh"
         }
         public enum PrecipitationUnit: String {
-            case mph = "inch"
+            case inch = "inch"
             case ms = "ms"
         }
     }
@@ -34,7 +34,7 @@ public extension OpenMeteo {
     func forecast(
         lat: Double,
         long: Double,
-        hourly: [HourlyMarineVariable]? = nil,
+        hourly: [HourlyForecastVariable]? = nil,
         currentWeather: Bool? = nil,
         timezone: String? = nil,
         pastDays: Int? = nil,
@@ -52,7 +52,7 @@ public extension OpenMeteo {
         if let timezone { queries.append(URLQueryItem(name: "timezone", value: timezone)) }
         if let pastDays { queries.append(URLQueryItem(name: "past_days", value: "\(pastDays)")) }
         if let forecastDays { queries.append(URLQueryItem(name: "forecast_days", value: "\(forecastDays)")) }
-        if let temperatureUnit { queries.append(URLQueryItem(name: "forecast_days", value: "\(temperatureUnit.rawValue)")) }
+        if let temperatureUnit { queries.append(URLQueryItem(name: "temperature_unit", value: "\(temperatureUnit.rawValue)")) }
         if let windSpeedUnit { queries.append(URLQueryItem(name: "windspeed_unit", value: "\(windSpeedUnit.rawValue)")) }
         if let precipitationUnit { queries.append(URLQueryItem(name: "precipitation_unit", value: "\(precipitationUnit.rawValue)")) }
         return await fetchForecastData(queries)
@@ -94,7 +94,7 @@ public extension OpenMeteo {
         if let hourly { queries.append(URLQueryItem(name: "hourly", value: "\(hourly.compactMap{$0.rawValue}.joined(separator: ","))")) }
         if let currentWeather { queries.append(URLQueryItem(name: "current_weather", value: "\(currentWeather)"))}
         if let timezone { queries.append(URLQueryItem(name: "timezone", value: timezone)) }
-        if let temperatureUnit { queries.append(URLQueryItem(name: "forecast_days", value: "\(temperatureUnit.rawValue)")) }
+        if let temperatureUnit { queries.append(URLQueryItem(name: "temperature_unit", value: "\(temperatureUnit.rawValue)")) }
         if let windSpeedUnit { queries.append(URLQueryItem(name: "windspeed_unit", value: "\(windSpeedUnit.rawValue)")) }
         if let precipitationUnit { queries.append(URLQueryItem(name: "precipitation_unit", value: "\(precipitationUnit.rawValue)")) }
         return await fetchForecastData(queries)
@@ -103,8 +103,8 @@ public extension OpenMeteo {
     private func fetchForecastData(_ queries: [URLQueryItem]) async -> (data: ForecastResponse?, error: ErrorResponse?) {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
-        urlComponents.host = "marine-api.open-meteo.com"
-        urlComponents.path = "/v1/marine"
+        urlComponents.host = "api.open-meteo.com"
+        urlComponents.path = "/v1/forecast"
         urlComponents.queryItems = queries
         urlComponents.queryItems?.append(URLQueryItem(name: "timeformat", value: "unixtime"))
 
@@ -120,6 +120,7 @@ public extension OpenMeteo {
                 let error = try? decoder.decode(ErrorResponse.self, from: data)
 
                 print("OpenMeteoAPI Server Returned Error: \(error?.reason ?? "Unknown Reason")")
+                return (nil, ErrorResponse(error: true, reason: error?.reason ?? "Unknown Reason"))
             }
 
             let result = try decoder.decode(ForecastResponse.self, from: data)

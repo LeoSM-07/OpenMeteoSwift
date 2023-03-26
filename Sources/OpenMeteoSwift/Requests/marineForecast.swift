@@ -142,6 +142,7 @@ public extension OpenMeteo {
                 let error = try? decoder.decode(ErrorResponse.self, from: data)
 
                 print("OpenMeteoAPI Server Returned Error: \(error?.reason ?? "Unknown Reason")")
+                return (nil, ErrorResponse(error: true, reason: error?.reason ?? "Unknown Reason"))
             }
 
             let result = try decoder.decode(MarineResponse.self, from: data)
