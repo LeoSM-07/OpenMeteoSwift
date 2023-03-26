@@ -1,6 +1,7 @@
 import Foundation
 
 public extension OpenMeteo {
+
     /// Request hourly data using `pastDays`
     /// - Parameters:
     ///   - lat: Geographical WGS84 coordinate of the location
@@ -10,7 +11,7 @@ public extension OpenMeteo {
     ///   Any time zone name from the [time zone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is supported.
     ///   - pastDays: The number of days in the past to return (limit 92)
     /// - Returns: Either the ``MarineResponse`` or ``ErrorResponse``
-    func getMarine(
+    func marineForecast(
         lat: Double,
         long: Double,
         hourly: [HourlyMarineVariable],
@@ -38,7 +39,7 @@ public extension OpenMeteo {
     ///   - startDate: The date to begin the data
     ///   - endDate: The date to end the data
     /// - Returns: Either the ``MarineResponse`` or ``ErrorResponse``
-    func getMarine(
+    func marineForecast(
         lat: Double,
         long: Double,
         hourly: [HourlyMarineVariable],
@@ -68,7 +69,7 @@ public extension OpenMeteo {
     ///   Any time zone name from the [time zone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is supported.
     ///   - pastDays: The number of days in the past to return (limit 92)
     /// - Returns: Either the ``MarineResponse`` or ``ErrorResponse``
-    func getMarine(
+    func marineForecast(
         lat: Double,
         long: Double,
         hourly: [HourlyMarineVariable]? = [],
@@ -98,7 +99,7 @@ public extension OpenMeteo {
     ///   - startDate: The date to begin the data
     ///   - endDate: The date to end the data
     /// - Returns: Either the ``MarineResponse`` or ``ErrorResponse``
-    func getMarine(
+    func marineForecast(
         lat: Double,
         long: Double,
         hourly: [HourlyMarineVariable]? = [],
