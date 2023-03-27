@@ -6,6 +6,17 @@ A swift package that enables swifty communication with the free [Open-Meteo API]
 
 Please refer to the [full documentation](https://leosm-07.github.io/OpenMeteoSwift/documentation/openmeteoswift/) that has additional guides and other supporting documentation.
 
+## Current Features & Todo
+**Current Features**
+- Weather Forecast Calls
+- Marine Forecast Calls
+- Geocoding API Calls
+
+**Todo:**
+- Clean up return data for marine forecast
+- Add historical forecast
+- Add air quality forecast
+- Maybe more? Submit an issue for requests :)
 
 ## [Weather Forecast Request](https://leosm-07.github.io/OpenMeteoSwift/documentation/openmeteoswift/requestingweatherdata)
 See the full API explorer on the [official Open-Meteo website](https://open-meteo.com/en/docs)
