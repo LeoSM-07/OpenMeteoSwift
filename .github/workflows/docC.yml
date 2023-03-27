@@ -33,7 +33,7 @@ jobs:
             transform-for-static-hosting /tmp/docbuild/Build/Products/Debug-iphoneos/OpenMeteoSwift.doccarchive \
             --hosting-base-path OpenMeteoSwift \
             --output-path docs;
-          echo "<script>window.location.href += \"/documentation/OpenMeteoSwift\"</script>" > docs/index.html;
+          echo "<script>window.location.href += \"/documentation/openmeteoswift\"</script>" > docs/index.html;
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
