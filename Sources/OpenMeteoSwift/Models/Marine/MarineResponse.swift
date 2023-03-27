@@ -30,6 +30,7 @@ private enum PrivateHourlyMarineVariable: String, MeteoData, CaseIterable, Codin
     case time = "time"
 }
 
+/// The result of a call to the Marine Forecast API
 public struct MarineResponse: MeteoData {
     /// WGS84 of the center of the weather grid-cell which was used to generate this forecast. This coordinate might be up to 5 km away.
     public var latitude: Double

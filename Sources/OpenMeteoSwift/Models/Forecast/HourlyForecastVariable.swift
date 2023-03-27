@@ -83,7 +83,7 @@ public enum HourlyForecastVariable: String, MeteoData, CaseIterable, CodingKey {
     case rain = "rain"
     /// Showers from convective precipitation in millimeters from the preceding hour
     case showers = "showers"
-    /// Weather condition as a numeric code. Follow WMO weather interpretation codes. See table below for details.
+    /// Weather condition as a numeric code. Follow WMO weather interpretation codes.
     case weatherCode = "weatherCode"
     /// Snow depth on the ground
     case snowDepth = "snow_depth"

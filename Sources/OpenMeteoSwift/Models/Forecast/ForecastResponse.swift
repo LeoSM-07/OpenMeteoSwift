@@ -66,7 +66,67 @@ private enum PrivateHourlyForecastVariable: String, MeteoData, CaseIterable, Cod
     case time = "time"
 }
 
+private enum PrivateDailyForecastVariable: String, MeteoData, CaseIterable, CodingKey {
+    case temperature2mMax = "temperature_2m_max"
+    case temperature2mMin = "temperature_2m_min"
+    case apparentTemperatureMax = "apparent_temperature_max"
+    case apparentTemperatureMin = "apparent_temperature_min"
+    case precipitationSum = "precipitation_sum"
+    case rainSum = "rain_sum"
+    case showersSum = "showers_sum"
+    case snowfallSum = "snowfall_sum"
+    case precipitationHours = "precipitation_hours"
+    case precipitationProbabilityMax = "precipitation_probability_max"
+    case precipitationProbabilityMin = "precipitation_probability_min"
+    case precipitationProbabilityMean = "precipitation_probability_mean"
+    case weatherCode = "weatherCode"
+    case sunrise = "sunrise"
+    case sunset = "sunset"
+    case windSpeed10mMax = "windspeed_10m_max"
+    case windGusts10mMax = "windgusts_10m_max"
+    case windDirection10mDominant = "winddirection_10m_dominant"
+    case shortWaveRadiationSum = "shortwave_radiation_sum"
+    case et0faoEvapotranspiration = "et0_fao_evapotranspiration"
+    case uvIndexMax = "uv_index_max"
+    case uvIndexClearSkyMax = "uv_index_clear_sky_max"
+    case time = "time"
+}
 
+/// A single snapshot in time that contains a date and appropriate measurements for that point in time
+public struct HourlyForecastItem: MeteoData {
+    /// The date of the Snapshot
+    public var date: Date
+    /// The measurements corresponding to the specific date
+    public var measurements: [ItemData]
+
+    public struct ItemData: MeteoData {
+        public var variable: HourlyForecastVariable
+        public var value: Float
+    }
+
+    public func measurementFor(_ variable: HourlyForecastVariable) -> Float? {
+        return measurements.first(where: {$0.variable == variable})?.value
+    }
+}
+
+/// A single snapshot in time that contains a date and appropriate measurements for that point in time
+public struct DailyForecastItem: MeteoData {
+    /// The date of the Snapshot
+    public var date: Date
+    /// The measurements corresponding to the specific date
+    public var measurements: [ItemData]
+
+    public struct ItemData: MeteoData {
+        public var variable: DailyForecastVariable
+        public var value: Float
+    }
+
+    public func measurementFor(_ variable: DailyForecastVariable) -> Float? {
+        return measurements.first(where: {$0.variable == variable})?.value
+    }
+}
+
+/// The data returned by a forecast request
 public struct ForecastResponse: MeteoData {
     /// WGS84 of the center of the weather grid-cell which was used to generate this forecast. This coordinate might be up to 5 km away.
     public var latitude: Double
@@ -87,7 +147,11 @@ public struct ForecastResponse: MeteoData {
     /// The units for an associated `HourlyForecastVariable`
     public var hourlyUnits: [HourlyForecastVariable: String]?
     /// A list of timestamps with associated forecast variables and their associated values
-    public var hourly: [Date: [HourlyForecastVariable: Float]]?
+    public var hourly: [HourlyForecastItem]?
+    /// The units for an associated `HourlyForecastVariable`
+    public var dailyUnits: [DailyForecastVariable: String]?
+    /// A list of timestamps with associated forecast variables and their associated values
+    public var daily: [DailyForecastItem]?
 
     enum CodingKeys: String, CodingKey {
         case latitude = "latitude"
@@ -100,6 +164,8 @@ public struct ForecastResponse: MeteoData {
         case currentWeather = "current_weather"
         case hourlyUnits = "hourly_units"
         case hourly = "hourly"
+        case dailyUnits = "daily_units"
+        case daily = "daily"
     }
 
     public init(from decoder: Decoder) throws {
@@ -125,8 +191,20 @@ public struct ForecastResponse: MeteoData {
             self.hourlyUnits = hourlyUnitsDict
         }
 
-        // Decode hourly
-        var hourlyDict: [Date: [HourlyForecastVariable: Float]] = [:]
+        // Decode hourly units
+        var dailyUnitsDict = [DailyForecastVariable: String]()
+
+        let dailyUnitsContainer = try? container.nestedContainer(keyedBy: DailyForecastVariable.self, forKey: .dailyUnits)
+        if let dailyUnitsContainer {
+            for key in dailyUnitsContainer.allKeys {
+                let value = try dailyUnitsContainer.decode(String.self, forKey: key)
+                dailyUnitsDict[key] = value
+            }
+            self.dailyUnits = dailyUnitsDict
+        }
+
+        // Decode Hourly
+        var hourlyArray: [HourlyForecastItem] = []
 
         let hourlyContainer = try? container.nestedContainer(keyedBy: PrivateHourlyForecastVariable.self, forKey: .hourly)
         if let hourlyContainer {
@@ -137,16 +215,40 @@ public struct ForecastResponse: MeteoData {
                 for (key) in hourlyContainer.allKeys {
                     if key != .time {
                         let element = try hourlyContainer.decode([Float].self, forKey: key)
-
-                        if (hourlyDict[date] != nil) {
-                            hourlyDict[date]!.updateValue(element[index], forKey: HourlyForecastVariable(rawValue: key.rawValue)!)
+                        if let hourlyIndex = hourlyArray.firstIndex(where: {$0.date == date}) {
+                            hourlyArray[hourlyIndex].measurements.append(.init(variable: HourlyForecastVariable(rawValue: key.rawValue)!, value: element[index]))
                         } else {
-                            hourlyDict.updateValue([HourlyForecastVariable(rawValue: key.rawValue)!: element[index]], forKey: date)
+                            hourlyArray.append(.init(date: date, measurements: [.init(variable: HourlyForecastVariable(rawValue: key.rawValue)!, value: element[index])]))
                         }
                     }
                 }
             }
-            self.hourly = hourlyDict
+            self.hourly = hourlyArray.sorted(by: {$0.date < $1.date})
         }
+
+
+        // Decode Daily
+        var dailyArray: [DailyForecastItem] = []
+
+        let dailyContainer = try? container.nestedContainer(keyedBy: PrivateDailyForecastVariable.self, forKey: .daily)
+        if let dailyContainer {
+            let timeArray = try dailyContainer.decode([Date].self, forKey: .time)
+
+            for (index, date) in timeArray.enumerated() {
+
+                for (key) in dailyContainer.allKeys {
+                    if key != .time {
+                        let element = try dailyContainer.decode([Float].self, forKey: key)
+                        if let dailyIndex = dailyArray.firstIndex(where: {$0.date == date}) {
+                            dailyArray[dailyIndex].measurements.append(.init(variable: DailyForecastVariable(rawValue: key.rawValue)!, value: element[index]))
+                        } else {
+                            dailyArray.append(.init(date: date, measurements: [.init(variable: DailyForecastVariable(rawValue: key.rawValue)!, value: element[index])]))
+                        }
+                    }
+                }
+            }
+            self.daily = dailyArray.sorted(by: {$0.date < $1.date})
+        }
+
     }
 }

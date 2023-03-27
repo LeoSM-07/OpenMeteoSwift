@@ -1,0 +1,100 @@
+{
+    "latitude": 52.52,
+    "longitude": 13.419998,
+    "generationtime_ms": 0.9009838104248047,
+    "utc_offset_seconds": -25200,
+    "timezone": "America/Los_Angeles",
+    "timezone_abbreviation": "PDT",
+    "elevation": 38.0,
+    "current_weather": {
+        "temperature": 41.2,
+        "windspeed": 6.3,
+        "winddirection": 8.0,
+        "weathercode": 3,
+        "time": 1679868000
+    },
+    "daily_units": {
+        "time": "unixtime",
+        "temperature_2m_max": "°F",
+        "temperature_2m_min": "°F",
+        "apparent_temperature_max": "°F",
+        "apparent_temperature_min": "°F",
+        "sunrise": "unixtime",
+        "sunset": "unixtime",
+        "uv_index_max": "",
+        "uv_index_clear_sky_max": "",
+        "precipitation_sum": "inch",
+        "rain_sum": "inch",
+        "showers_sum": "inch",
+        "snowfall_sum": "inch",
+        "precipitation_hours": "h",
+        "precipitation_probability_max": "%",
+        "windspeed_10m_max": "mp/h",
+        "windgusts_10m_max": "mp/h",
+        "winddirection_10m_dominant": "°",
+        "shortwave_radiation_sum": "MJ/m²",
+        "et0_fao_evapotranspiration": "inch"
+    },
+    "daily": {
+        "time": [
+            1679814000
+        ],
+        "temperature_2m_max": [
+            50.7
+        ],
+        "temperature_2m_min": [
+            33.3
+        ],
+        "apparent_temperature_max": [
+            45.1
+        ],
+        "apparent_temperature_min": [
+            25.8
+        ],
+        "sunrise": [
+            1679806350
+        ],
+        "sunset": [
+            1679851891
+        ],
+        "uv_index_max": [
+            1.80
+        ],
+        "uv_index_clear_sky_max": [
+            4.20
+        ],
+        "precipitation_sum": [
+            0.000
+        ],
+        "rain_sum": [
+            0.000
+        ],
+        "showers_sum": [
+            0.000
+        ],
+        "snowfall_sum": [
+            0.000
+        ],
+        "precipitation_hours": [
+            0.0
+        ],
+        "precipitation_probability_max": [
+            26
+        ],
+        "windspeed_10m_max": [
+            9.5
+        ],
+        "windgusts_10m_max": [
+            21.9
+        ],
+        "winddirection_10m_dominant": [
+            315
+        ],
+        "shortwave_radiation_sum": [
+            7.42
+        ],
+        "et0_fao_evapotranspiration": [
+            0.052
+        ]
+    }
+}

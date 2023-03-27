@@ -58,6 +58,7 @@ public extension OpenMeteo {
         return await fetchForecastData(queries)
     }
 
+    
     /// Get general weather forecast data for a location
     /// - Parameters:
     ///   - lat: Geographical WGS84 coordinate of the location
