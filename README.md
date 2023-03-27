@@ -6,7 +6,7 @@ A swift package that enables swifty communication with the free [Open-Meteo API]
 
 Please refer to the [full documentation](https://leosm-07.github.io/OpenMeteoSwift/documentation/openmeteoswift/) that has additional guides and other supporting documentation.
 
-## Current Features & Todo
+## Current Features & Todo:
 **Current Features**
 - Weather Forecast Calls
 - Marine Forecast Calls
