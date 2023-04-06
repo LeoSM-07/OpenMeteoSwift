@@ -38,7 +38,7 @@ public enum DailyForecastVariable: String, MeteoData, CaseIterable, CodingKey {
     /// The most severe weather condition on a given day.
     ///
     /// Follow WMO weather interpretation codes.
-    case weatherCode = "weatherCode"
+    case weatherCode = "weathercode"
     /// Sunrise set time in Unix timestamp form
     case sunrise = "sunrise"
     /// Sunset set time in Unix timestamp form
