@@ -37,8 +37,6 @@ extension OpenMeteoSwiftTests {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
         let decodeTest = try decoder.decode(MarineResponse.self, from: data)
-        let hourlySorted = decodeTest.hourly!.sorted(by: {$0.key < $1.key})
-        let dailySorted = decodeTest.daily!.sorted(by: {$0.key < $1.key})
 
         XCTAssertEqual(decodeTest.latitude, 33.75)
         XCTAssertEqual(decodeTest.longitude, -118.75)
@@ -46,8 +44,5 @@ extension OpenMeteoSwiftTests {
         XCTAssertEqual(decodeTest.utcOffsetSeconds, -25200)
         XCTAssertEqual(decodeTest.timezone, "America/Los_Angeles")
         XCTAssertEqual(decodeTest.timezoneAbbreviation, "PDT")
-        XCTAssertEqual(hourlySorted.first?.key, Date(timeIntervalSince1970: 1679122800))
-        XCTAssertEqual(hourlySorted.first?.value.count, decodeTest.hourlyUnits?.count)
-        XCTAssertEqual(dailySorted.first?.value.count, decodeTest.dailyUnits?.count)
     }
 }

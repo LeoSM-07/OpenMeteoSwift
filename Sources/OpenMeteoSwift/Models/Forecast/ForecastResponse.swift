@@ -18,12 +18,8 @@ public struct ForecastResponse: MeteoData {
     public var timezoneAbbreviation: String
     /// Returns the current weather conditions if requested. Not included by default.
     public var currentWeather: CurrentWeather?
-    /// The units for an associated `HourlyForecastVariable`
-    public var hourlyUnits: [HourlyForecastVariable: String]?
     /// A list of timestamps with associated forecast variables and their associated values
     public var hourly: [WeatherItem<HourlyForecastVariable>]?
-    /// The units for an associated `HourlyForecastVariable`
-    public var dailyUnits: [DailyForecastVariable: String]?
     /// A list of timestamps with associated forecast variables and their associated values
     public var daily: [WeatherItem<DailyForecastVariable>]?
 
@@ -62,7 +58,6 @@ public struct ForecastResponse: MeteoData {
                 let value = try hourlyUnitsContainer.decode(String.self, forKey: key)
                 hourlyUnitsDict[key] = value
             }
-            self.hourlyUnits = hourlyUnitsDict
         }
 
         // Decode hourly units
@@ -74,7 +69,6 @@ public struct ForecastResponse: MeteoData {
                 let value = try dailyUnitsContainer.decode(String.self, forKey: key)
                 dailyUnitsDict[key] = value
             }
-            self.dailyUnits = dailyUnitsDict
         }
 
         // Decode Hourly
@@ -88,7 +82,7 @@ public struct ForecastResponse: MeteoData {
                 for (key) in hourlyContainer.allKeys {
                     if key.stringValue != "time" {
                         let element = try hourlyContainer.decode([Float].self, forKey: key)
-                        let unit = hourlyUnits!.first(where: {$0.key == .init(stringValue: key.stringValue)!})!
+                        let unit = hourlyUnitsDict.first(where: {$0.key == .init(stringValue: key.stringValue)!})!
                         if let hourlyIndex = hourlyArray.firstIndex(where: {$0.date == date}) {
                             hourlyArray[hourlyIndex].measurements.append(.init(unit: unit.value, label: HourlyForecastVariable(rawValue: key.stringValue)!, value: element[index]))
                         } else {
@@ -112,7 +106,7 @@ public struct ForecastResponse: MeteoData {
                 for (key) in dailyContainer.allKeys {
                     if key.stringValue != "time" {
                         let element = try dailyContainer.decode([Float].self, forKey: key)
-                        let unit = dailyUnits!.first(where: {$0.key == .init(stringValue: key.stringValue)!})!
+                        let unit = dailyUnitsDict.first(where: {$0.key == .init(stringValue: key.stringValue)!})!
                         if let dailyIndex = dailyArray.firstIndex(where: {$0.date == date}) {
                             dailyArray[dailyIndex].measurements.append(.init(unit: unit.value, label: DailyForecastVariable(rawValue: key.stringValue)!, value: element[index]))
                         } else {
