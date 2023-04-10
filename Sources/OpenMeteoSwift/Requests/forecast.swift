@@ -197,8 +197,6 @@ public extension OpenMeteo {
         urlComponents.queryItems = queries
         urlComponents.queryItems?.append(URLQueryItem(name: "timeformat", value: "unixtime"))
 
-        print(urlComponents.url!)
-
         let request = URLRequest(url: urlComponents.url!)
 
         do {

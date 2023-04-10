@@ -1,35 +1,5 @@
 import Foundation
 
-private enum PrivateDailyMarineVariable: String, MeteoData, CaseIterable, CodingKey {
-    case waveHeightMax = "wave_height_max"
-    case waveDirectionDominant = "wave_direction_dominant"
-    case wavePeriodMax = "wave_period_max"
-    case windWaveHeightMax = "wind_wave_height_max"
-    case windWaveDirectionDominant = "wind_wave_direction_dominant"
-    case windWavePeriodMax = "wind_wave_period_max"
-    case windWavePeakPeriodMax = "wind_wave_peak_period_max"
-    case swellWaveHeightMax = "swell_wave_height_max"
-    case swellWaveDirectionDominant = "swell_wave_direction_dominant"
-    case swellWavePeriodMax = "swell_wave_period_max"
-    case swellWavePeakPeriodMax = "swell_wave_peak_period_max"
-    case time = "time"
-}
-
-private enum PrivateHourlyMarineVariable: String, MeteoData, CaseIterable, CodingKey {
-    case waveHeight = "wave_height"
-    case waveDirection = "wave_direction"
-    case wavePeriod = "wave_period"
-    case windWaveHeight = "wind_wave_height"
-    case windWaveDirection = "wind_wave_direction"
-    case windWavePeriod = "wind_wave_period"
-    case windWavePeakPeriod = "wind_wave_peak_period"
-    case swellWaveHeight = "swell_wave_height"
-    case swellWaveDirection = "swell_wave_direction"
-    case swellWavePeriod = "swell_wave_period"
-    case swellWavePeakPeriod = "swell_wave_peak_period"
-    case time = "time"
-}
-
 /// The result of a call to the Marine Forecast API
 public struct MarineResponse: MeteoData {
     /// WGS84 of the center of the weather grid-cell which was used to generate this forecast. This coordinate might be up to 5 km away.
@@ -44,14 +14,10 @@ public struct MarineResponse: MeteoData {
     public var timezone: String
     /// Timezone abbreviation (e.g. `CEST`)
     public var timezoneAbbreviation: String
-    /// The units for an associated `HourlyMarineVariable`
-    public var hourlyUnits: [HourlyMarineVariable: String]?
     /// A list of timestamps with associated marine variables and their associated values
-    public var hourly: [Date: [HourlyMarineVariable: Float]]?
-    /// The units for an associated `DailyMarineVariable`
-    public var dailyUnits: [DailyMarineVariable: String]?
+    public var hourly: [WeatherItem<HourlyMarineVariable>]?
     /// A list of timestamps with associated marine variables and their associated values
-    public var daily: [Date: [DailyMarineVariable: Float]]?
+    public var daily: [WeatherItem<DailyMarineVariable>]?
 
     enum CodingKeys: String, CodingKey {
         case latitude = "latitude"
@@ -84,7 +50,6 @@ public struct MarineResponse: MeteoData {
                 let value = try hourlyUnitsContainer.decode(String.self, forKey: key)
                 hourlyUnitsDict[key] = value
             }
-            self.hourlyUnits = hourlyUnitsDict
         }
 
         // Decode daily units
@@ -96,55 +61,53 @@ public struct MarineResponse: MeteoData {
                 let value = try dailyUnitsContainer.decode(String.self, forKey: key)
                 dailyUnitsDict[key] = value
             }
-            self.dailyUnits = dailyUnitsDict
         }
 
-        // Decode hourly
-        var hourlyDict: [Date: [HourlyMarineVariable: Float]] = [:]
-
-        let hourlyContainer = try? container.nestedContainer(keyedBy: PrivateHourlyMarineVariable.self, forKey: .hourly)
+        // Decode Hourly
+        var hourlyArray: [WeatherItem<HourlyMarineVariable>] = []
+        let hourlyContainer = try? container.nestedContainer(keyedBy: CustomCodingKey.self, forKey: .hourly)
         if let hourlyContainer {
-            let timeArray = try hourlyContainer.decode([Date].self, forKey: .time)
+            let timeArray = try hourlyContainer.decode([Date].self, forKey: .init(stringValue: "time"))
 
             for (index, date) in timeArray.enumerated() {
 
                 for (key) in hourlyContainer.allKeys {
-                    if key != .time {
+                    if key.stringValue != "time" {
                         let element = try hourlyContainer.decode([Float].self, forKey: key)
-
-                        if (hourlyDict[date] != nil) {
-                            hourlyDict[date]!.updateValue(element[index], forKey: HourlyMarineVariable(rawValue: key.rawValue)!)
+                        let unit = hourlyUnitsDict.first(where: {$0.key == .init(stringValue: key.stringValue)!})!
+                        if let hourlyIndex = hourlyArray.firstIndex(where: {$0.date == date}) {
+                            hourlyArray[hourlyIndex].measurements.append(.init(unit: unit.value, label: HourlyMarineVariable(rawValue: key.stringValue)!, value: element[index]))
                         } else {
-                            hourlyDict.updateValue([HourlyMarineVariable(rawValue: key.rawValue)!: element[index]], forKey: date)
+                            hourlyArray.append(.init(date: date, measurements: [.init(unit: unit.value, label: HourlyMarineVariable(rawValue: key.stringValue)!, value: element[index])]))
                         }
                     }
                 }
             }
-            self.hourly = hourlyDict
+            self.hourly = hourlyArray.sorted(by: {$0.date < $1.date})
         }
 
-        // Decode daily
-        var dailyDict: [Date: [DailyMarineVariable: Float]] = [:]
+        // Decode Daily
+        var dailyArray: [WeatherItem<DailyMarineVariable>] = []
 
-        let dailyContainer = try? container.nestedContainer(keyedBy: PrivateDailyMarineVariable.self, forKey: .daily)
+        let dailyContainer = try? container.nestedContainer(keyedBy: CustomCodingKey.self, forKey: .daily)
         if let dailyContainer {
-            let timeArrayDaily = try dailyContainer.decode([Date].self, forKey: .time)
-            
-            for (index, date) in timeArrayDaily.enumerated() {
-                
+            let timeArray = try dailyContainer.decode([Date].self, forKey: .init(stringValue: "time"))
+
+            for (index, date) in timeArray.enumerated() {
+
                 for (key) in dailyContainer.allKeys {
-                    if key != .time {
+                    if key.stringValue != "time" {
                         let element = try dailyContainer.decode([Float].self, forKey: key)
-                        
-                        if (dailyDict[date] != nil) {
-                            dailyDict[date]!.updateValue(element[index], forKey: DailyMarineVariable(rawValue: key.rawValue)!)
+                        let unit = dailyUnitsDict.first(where: {$0.key == .init(stringValue: key.stringValue)!})!
+                        if let dailyIndex = dailyArray.firstIndex(where: {$0.date == date}) {
+                            dailyArray[dailyIndex].measurements.append(.init(unit: unit.value, label: DailyMarineVariable(rawValue: key.stringValue)!, value: element[index]))
                         } else {
-                            dailyDict.updateValue([DailyMarineVariable(rawValue: key.rawValue)!: element[index]], forKey: date)
+                            dailyArray.append(.init(date: date, measurements: [.init(unit: unit.value, label: DailyMarineVariable(rawValue: key.stringValue)!, value: element[index])]))
                         }
                     }
                 }
             }
-            self.daily = dailyDict
+            self.daily = dailyArray.sorted(by: {$0.date < $1.date})
         }
     }
 }

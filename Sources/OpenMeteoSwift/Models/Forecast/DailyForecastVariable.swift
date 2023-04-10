@@ -1,16 +1,9 @@
-//
-// File.swift
-// 
-//
-// Created by LeoSM_07 on 3/26/23.
-//
-
 import Foundation
 
 /// All possible parameters that can be requested and returned from the weather API. Single value for each day.
 ///
 /// Aggregations are a simple 24 hour aggregation from hourly values.
-public enum DailyForecastVariable: String, MeteoData, CaseIterable, CodingKey {
+public enum DailyForecastVariable: String, WeatherVariable {
     /// Maximum daily air temperature at 2 meters above ground
     case temperature2mMax = "temperature_2m_max"
     /// Minimum daily air temperature at 2 meters above ground

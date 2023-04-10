@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Most weather variables are given as an instantaneous value for the indicated hour.
 /// Some variables like precipitation are calculated from the preceding hour as an average or sum.
-public enum HourlyMarineVariable: String, MeteoData, CaseIterable, CodingKey {
+public enum HourlyMarineVariable: String, WeatherVariable {
     case waveHeight = "wave_height"
     case waveDirection = "wave_direction"
     case wavePeriod = "wave_period"

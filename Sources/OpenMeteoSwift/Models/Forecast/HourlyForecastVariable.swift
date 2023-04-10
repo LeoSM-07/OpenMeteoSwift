@@ -1,6 +1,6 @@
 import Foundation
 
-public enum HourlyForecastVariable: String, MeteoData, CaseIterable, CodingKey {
+public enum HourlyForecastVariable: String, WeatherVariable {
     /// Air temperature at 2 meters above ground
     case temperature2m = "temperature_2m"
     /// Relative humidity at 2 meters above ground

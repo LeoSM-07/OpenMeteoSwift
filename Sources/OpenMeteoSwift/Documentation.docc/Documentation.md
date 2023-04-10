@@ -8,8 +8,6 @@ Seamlessly connect with Open-Meteo, the free weather forecast API for non-commer
 ## Overview
 To make your first request, check out the <doc:QuickstartGuide>.
 
->Note VercelKit is powered the official REST API provided by [Vercel](https://vercel.com/docs/rest-api) but is not affiliated in any way with Vercel.
-
 ## Project Structure
 This project is far from complete. If you experience any bugs or have any feature requests, please file an issue over on [GitHub](https://github.com/LeoSM-07/VercelKit). 
 
